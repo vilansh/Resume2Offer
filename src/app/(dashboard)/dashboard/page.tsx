@@ -26,7 +26,6 @@ export default function DashboardPage() {
       </header>
 
       <Suspense fallback={<DashboardSkeleton />}>
-        {/* @ts-expect-error Async Server Component */}
         <DashboardContent />
       </Suspense>
     </section>
