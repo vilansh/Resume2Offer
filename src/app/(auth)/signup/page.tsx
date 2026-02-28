@@ -21,6 +21,7 @@ export default function SignupPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, fullName }),
+        credentials: 'include',
       })
 
       if (!res.ok) {
@@ -31,8 +32,7 @@ export default function SignupPage() {
       }
 
       toast.success('Account created! Redirecting...')
-      router.push('/dashboard')
-      router.refresh()
+      window.location.href = '/dashboard'
     } catch (err) {
       console.error('Signup error', err)
       toast.error('Network error while signing up. Please try again.')

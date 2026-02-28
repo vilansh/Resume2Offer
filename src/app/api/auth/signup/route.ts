@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
 
 export const runtime = 'nodejs'
 
@@ -18,7 +18,23 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const response = NextResponse.json({ user: null })
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return req.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -32,7 +48,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    return NextResponse.json({ user: data.user })
+    return new NextResponse(JSON.stringify({ user: data.user }), {
+      status: 200,
+      headers: response.headers,
+    })
   } catch (err) {
     console.error('Auth signup route error', err)
     const message =

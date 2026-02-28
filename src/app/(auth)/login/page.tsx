@@ -20,6 +20,7 @@ export default function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        credentials: 'include',
       })
 
       if (!res.ok) {
@@ -30,8 +31,7 @@ export default function LoginPage() {
       }
 
       toast.success('Welcome back!')
-      router.push('/dashboard')
-      router.refresh()
+      window.location.href = '/dashboard'
     } catch (err) {
       console.error('Login error', err)
       toast.error('Network error while signing in. Please try again.')
