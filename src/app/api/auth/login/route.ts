@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const response = NextResponse.json({ user: null });
+    // create one response object up front; we'll attach any cookies
+    // the Supabase client produces directly to it.
+    const response = NextResponse.json({ user: null, session: null });
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -44,17 +46,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    // Return the user and session so the client can inspect them if needed.
-    const out = NextResponse.json({ user: data.user, session: data.session });
-    try {
-      const existing = response.cookies.getAll();
-      existing.forEach(({ name, value, options }) =>
-        out.cookies.set(name, value, options),
-      );
-    } catch {
-      // ignore if cookies API isn't available
-    }
+    // collect cookies set by Supabase
+    const cookieList = response.cookies.getAll();
+    console.log("login cookies set by supabase", cookieList);
 
+    // return body including cookie info for debugging purposes
+    const out = NextResponse.json({
+      user: data.user,
+      session: data.session,
+      cookies: cookieList,
+    });
+    // copy cookies to outgoing response
+    cookieList.forEach(({ name, value, options }) =>
+      out.cookies.set(name, value, options),
+    );
     return out;
   } catch (err) {
     console.error("Auth login route error", err);

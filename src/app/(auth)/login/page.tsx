@@ -33,6 +33,7 @@ export default function LoginPage() {
       }
 
       const body = await res.json();
+      console.log("login response body", body);
       toast.success("Welcome back!");
       // redirect after the response has been received; cookies are included
       // in the response so they should be available on the next page load.

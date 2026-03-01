@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const response = NextResponse.json({ user: null });
+    const response = NextResponse.json({ user: null, session: null });
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -48,19 +48,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    // Build response including session info so the client can decide where
-    // to navigate. `data.session` will be null when email confirmation is
-    // required, which is the case on many Supabase projects.
-    const out = NextResponse.json({ user: data.user, session: data.session });
-    try {
-      const existing = response.cookies.getAll();
-      existing.forEach(({ name, value, options }) =>
-        out.cookies.set(name, value, options),
-      );
-    } catch {
-      // ignore if cookies API isn't available
-    }
+    const cookieList = response.cookies.getAll();
+    console.log("signup cookies set by supabase", cookieList);
 
+    const out = NextResponse.json({
+      user: data.user,
+      session: data.session,
+      cookies: cookieList,
+    });
+    cookieList.forEach(({ name, value, options }) =>
+      out.cookies.set(name, value, options),
+    );
     return out;
   } catch (err) {
     console.error("Auth signup route error", err);

@@ -34,6 +34,7 @@ export default function SignupPage() {
       }
 
       const body = await res.json();
+      console.log("signup response body", body);
       toast.success("Account created! Redirecting...");
       // If a session was returned, we can go straight to dashboard. Otherwise
       // the user still needs to log in (or verify their email) so send them to
