@@ -1,76 +1,93 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { toast } from 'sonner'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
 
 export default function SignupPage() {
-  const router = useRouter()
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSignup(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, fullName }),
-        credentials: 'include',
-      })
+        credentials: "include",
+      });
 
       if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string }
-        toast.error(body.error || 'Could not create account. Please try again.')
-        setLoading(false)
-        return
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        toast.error(
+          body.error || "Could not create account. Please try again.",
+        );
+        setLoading(false);
+        return;
       }
 
-      toast.success('Account created! Redirecting...')
-      window.location.href = '/dashboard'
+      const body = await res.json();
+      toast.success("Account created! Redirecting...");
+      // If a session was returned, we can go straight to dashboard. Otherwise
+      // the user still needs to log in (or verify their email) so send them to
+      // the login page.
+      if (body.session) {
+        window.location.href = "/dashboard";
+      } else {
+        router.push("/login");
+      }
     } catch (err) {
-      console.error('Signup error', err)
-      toast.error('Network error while signing up. Please try again.')
-      setLoading(false)
+      console.error("Signup error", err);
+      toast.error("Network error while signing up. Please try again.");
+      setLoading(false);
     }
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '420px', padding: '0 24px' }}>
-
-      <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+    <div style={{ width: "100%", maxWidth: "420px", padding: "0 24px" }}>
+      <div style={{ textAlign: "center", marginBottom: "48px" }}>
         <h1
           className="font-serif"
-          style={{ fontSize: '28px', fontWeight: 400, marginBottom: '8px', color: '#C9A84C' }}
+          style={{
+            fontSize: "28px",
+            fontWeight: 400,
+            marginBottom: "8px",
+            color: "#C9A84C",
+          }}
         >
           Resume2Offer
         </h1>
-        <p style={{ color: '#625D78', fontSize: '14px' }}>
+        <p style={{ color: "#625D78", fontSize: "14px" }}>
           Create your free account
         </p>
       </div>
 
-      <div style={{
-        background: '#0E0D10',
-        border: '1px solid #1E1C26',
-        borderRadius: '16px',
-        padding: '32px',
-      }}>
+      <div
+        style={{
+          background: "#0E0D10",
+          border: "1px solid #1E1C26",
+          borderRadius: "16px",
+          padding: "32px",
+        }}
+      >
         <form onSubmit={handleSignup}>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '13px',
-              fontWeight: 500,
-              color: '#A09BB8',
-              marginBottom: '8px',
-            }}>
+          <div style={{ marginBottom: "20px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#A09BB8",
+                marginBottom: "8px",
+              }}
+            >
               Full name
             </label>
             <input
@@ -78,19 +95,21 @@ export default function SignupPage() {
               type="text"
               placeholder="Arjun Mehta"
               value={fullName}
-              onChange={e => setFullName(e.target.value)}
+              onChange={(e) => setFullName(e.target.value)}
               required
             />
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '13px',
-              fontWeight: 500,
-              color: '#A09BB8',
-              marginBottom: '8px',
-            }}>
+          <div style={{ marginBottom: "20px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#A09BB8",
+                marginBottom: "8px",
+              }}
+            >
               Email address
             </label>
             <input
@@ -98,19 +117,21 @@ export default function SignupPage() {
               type="email"
               placeholder="you@example.com"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
 
-          <div style={{ marginBottom: '28px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '13px',
-              fontWeight: 500,
-              color: '#A09BB8',
-              marginBottom: '8px',
-            }}>
+          <div style={{ marginBottom: "28px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#A09BB8",
+                marginBottom: "8px",
+              }}
+            >
               Password
             </label>
             <input
@@ -118,7 +139,7 @@ export default function SignupPage() {
               type="password"
               placeholder="Min 6 characters"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
             />
@@ -129,43 +150,49 @@ export default function SignupPage() {
             className="btn-primary"
             disabled={loading}
             style={{
-              width: '100%',
-              justifyContent: 'center',
+              width: "100%",
+              justifyContent: "center",
               opacity: loading ? 0.7 : 1,
-              cursor: loading ? 'not-allowed' : 'pointer',
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            {loading ? 'Creating account...' : 'Create Free Account →'}
+            {loading ? "Creating account..." : "Create Free Account →"}
           </button>
-
         </form>
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          margin: '24px 0',
-        }}>
-          <div style={{ flex: 1, height: '1px', background: '#1E1C26' }} />
-          <span style={{ fontSize: '12px', color: '#3D394F' }}>or</span>
-          <div style={{ flex: 1, height: '1px', background: '#1E1C26' }} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            margin: "24px 0",
+          }}
+        >
+          <div style={{ flex: 1, height: "1px", background: "#1E1C26" }} />
+          <span style={{ fontSize: "12px", color: "#3D394F" }}>or</span>
+          <div style={{ flex: 1, height: "1px", background: "#1E1C26" }} />
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: '14px', color: '#625D78' }}>
-          Already have an account?{' '}
-          <Link href="/login" style={{ color: '#C9A84C', textDecoration: 'none', fontWeight: 500 }}>
+        <p style={{ textAlign: "center", fontSize: "14px", color: "#625D78" }}>
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            style={{
+              color: "#C9A84C",
+              textDecoration: "none",
+              fontWeight: 500,
+            }}
+          >
             Sign in
           </Link>
         </p>
-
       </div>
 
-      <p style={{ textAlign: 'center', marginTop: '24px', fontSize: '13px' }}>
-        <Link href="/" style={{ color: '#625D78', textDecoration: 'none' }}>
+      <p style={{ textAlign: "center", marginTop: "24px", fontSize: "13px" }}>
+        <Link href="/" style={{ color: "#625D78", textDecoration: "none" }}>
           ← Back to home
         </Link>
       </p>
-
     </div>
-  )
+  );
 }
