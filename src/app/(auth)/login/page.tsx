@@ -1,222 +1,84 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { toast } from "sonner";
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
 
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
-        toast.error(
-          body.error || "Could not sign in. Please check your details.",
-        );
-        setLoading(false);
-        return;
-      }
-
-      const body = await res.json();
-      console.log("login response body", body);
-      toast.success("Welcome back!");
-      // redirect after the response has been received; cookies are included
-      // in the response so they should be available on the next page load.
-      // using router.push to keep the app client-side, which is slightly more
-      // graceful than assignment.
-      router.push("/dashboard");
-    } catch (err) {
-      console.error("Login error", err);
-      toast.error("Network error while signing in. Please try again.");
-      setLoading(false);
+    if (error) {
+      toast.error(error.message)
+      setLoading(false)
+      return
     }
+
+    toast.success('Welcome back!')
+    window.location.href = '/dashboard'
   }
 
   return (
-    <div
-      style={{
-        width: "100%",
-        maxWidth: "420px",
-        padding: "0 24px",
-      }}
-    >
-      {/* Logo */}
-      <div style={{ textAlign: "center", marginBottom: "48px" }}>
-        <h1
-          className="font-serif gold-text-static"
-          style={{
-            fontSize: "28px",
-            fontWeight: 400,
-            marginBottom: "8px",
-          }}
-        >
+    <div style={{ width: '100%', maxWidth: '420px', padding: '0 24px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <h1 className="font-serif" style={{ fontSize: '28px', fontWeight: 400, marginBottom: '8px', color: '#C9A84C' }}>
           Resume2Offer
         </h1>
-        <p style={{ color: "var(--color-text-3)", fontSize: "14px" }}>
-          Sign in to your account
-        </p>
+        <p style={{ color: '#625D78', fontSize: '14px' }}>Sign in to your account</p>
       </div>
 
-      {/* Card */}
-      <div
-        style={{
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "16px",
-          padding: "32px",
-        }}
-      >
+      <div style={{ background: '#0E0D10', border: '1px solid #1E1C26', borderRadius: '16px', padding: '32px' }}>
         <form onSubmit={handleLogin}>
-          {/* Email */}
-          <div style={{ marginBottom: "20px" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "13px",
-                fontWeight: 500,
-                color: "var(--color-text-2)",
-                marginBottom: "8px",
-                fontFamily: "var(--font-dm)",
-              }}
-            >
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#A09BB8', marginBottom: '8px' }}>
               Email address
             </label>
-            <input
-              className="input"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
+            <input className="input" type="email" placeholder="you@example.com"
+              value={email} onChange={e => setEmail(e.target.value)} required />
           </div>
 
-          {/* Password */}
-          <div style={{ marginBottom: "28px" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "13px",
-                fontWeight: 500,
-                color: "var(--color-text-2)",
-                marginBottom: "8px",
-                fontFamily: "var(--font-dm)",
-              }}
-            >
+          <div style={{ marginBottom: '28px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#A09BB8', marginBottom: '8px' }}>
               Password
             </label>
-            <input
-              className="input"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
+            <input className="input" type="password" placeholder="••••••••"
+              value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={loading}
-            style={{
-              width: "100%",
-              justifyContent: "center",
-              opacity: loading ? 0.7 : 1,
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-          >
-            {loading ? "Signing in..." : "Sign In →"}
+          <button type="submit" className="btn-primary" disabled={loading}
+            style={{ width: '100%', justifyContent: 'center', opacity: loading ? 0.7 : 1 }}>
+            {loading ? 'Signing in...' : 'Sign In →'}
           </button>
         </form>
 
-        {/* Divider */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            margin: "24px 0",
-          }}
-        >
-          <div
-            style={{
-              flex: 1,
-              height: "1px",
-              background: "var(--color-border)",
-            }}
-          />
-          <span style={{ fontSize: "12px", color: "var(--color-text-4)" }}>
-            or
-          </span>
-          <div
-            style={{
-              flex: 1,
-              height: "1px",
-              background: "var(--color-border)",
-            }}
-          />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '24px 0' }}>
+          <div style={{ flex: 1, height: '1px', background: '#1E1C26' }} />
+          <span style={{ fontSize: '12px', color: '#3D394F' }}>or</span>
+          <div style={{ flex: 1, height: '1px', background: '#1E1C26' }} />
         </div>
 
-        {/* Signup link */}
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: "14px",
-            color: "var(--color-text-3)",
-          }}
-        >
-          Don't have an account?{" "}
-          <Link
-            href="/signup"
-            style={{
-              color: "var(--color-gold)",
-              textDecoration: "none",
-              fontWeight: 500,
-            }}
-          >
+        <p style={{ textAlign: 'center', fontSize: '14px', color: '#625D78' }}>
+          Don't have an account?{' '}
+          <Link href="/signup" style={{ color: '#C9A84C', textDecoration: 'none', fontWeight: 500 }}>
             Sign up free
           </Link>
         </p>
       </div>
 
-      {/* Back to home */}
-      <p
-        style={{
-          textAlign: "center",
-          marginTop: "24px",
-          fontSize: "13px",
-          color: "var(--color-text-4)",
-        }}
-      >
-        <Link
-          href="/"
-          style={{
-            color: "var(--color-text-3)",
-            textDecoration: "none",
-          }}
-        >
-          ← Back to home
-        </Link>
+      <p style={{ textAlign: 'center', marginTop: '24px', fontSize: '13px' }}>
+        <Link href="/" style={{ color: '#625D78', textDecoration: 'none' }}>← Back to home</Link>
       </p>
     </div>
-  );
+  )
 }
