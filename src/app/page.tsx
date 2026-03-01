@@ -490,7 +490,7 @@ export default function HomePage() {
       <footer className="border-t border-[var(--color-border)] py-6 text-center text-xs text-[var(--color-text-3)]">
         <p>
           Built with <span className="gold-text-static">❤️</span> by{' '}
-          <span className="gold-text-static">Vilansh</span>
+          <span className="gold-text-static">Vilansh Sharma</span>
         </p>
       </footer>
     </div>
